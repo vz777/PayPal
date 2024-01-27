@@ -47,8 +47,16 @@ class ConfigurationController extends BaseAdminController
         if (null !== $response = $this->checkAuth(AdminResources::MODULE, 'atos', AccessManager::UPDATE)) {
             return $response;
         }
+    $logFilePath = PaypalApiLogManager::getLogFilePath();
 
-        $logFilePath = PaypalApiLogManager::getLogFilePath();
+    $response = new Response();
+    $response->setContent(@file_get_contents($logFilePath));
+    $response->headers->set('Content-type', 'text/plain');
+    $response->headers->set('Content-Disposition', sprintf('Attachment;filename=paypal-log.txt'));
+
+    return $response;
+
+    /*    $logFilePath = PaypalApiLogManager::getLogFilePath();
 
         return Response::create(
             @file_get_contents($logFilePath),
@@ -57,7 +65,7 @@ class ConfigurationController extends BaseAdminController
                 'Content-type' => "text/plain",
                 'Content-Disposition' => sprintf('Attachment;filename=paypal-log.txt')
             )
-        );
+        );*/
     }
 
     /*
@@ -69,7 +77,7 @@ class ConfigurationController extends BaseAdminController
             return $response;
         }
 
-        $configurationForm = $this->createForm('paypal.form.configure');
+        $configurationForm = $this->createForm('paypal_form_configure');
 
         try {
             $form = $this->validateForm($configurationForm, "POST");

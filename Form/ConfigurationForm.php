@@ -23,9 +23,14 @@
 namespace Paypal\Form;
 
 use Paypal\Paypal;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Thelia\Form\BaseForm;
+
+
 
 /**
  * Class ConfigurePaypal
@@ -39,7 +44,7 @@ class ConfigurationForm extends BaseForm
         $this->formBuilder
             ->add(
                 'login',
-                'text',
+                TextType::class,
                 [
                     'constraints' =>  [ new NotBlank() ],
                     'label' => $this->translator->trans('login', [], Paypal::DOMAIN),
@@ -50,7 +55,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'password',
-                'text',
+                TextType::class,
                 [
                     'constraints' =>  [ new NotBlank() ],
                     'label' => $this->translator->trans('password', [], Paypal::DOMAIN),
@@ -61,7 +66,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'signature',
-                'text',
+                TextType::class,
                 [
                     'constraints' =>  [ new NotBlank() ],
                     'label' => $this->translator->trans('signature', [], Paypal::DOMAIN),
@@ -72,7 +77,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'sandbox',
-                'checkbox',
+                CheckboxType::class,
                 [
                     'value' => 1,
                     'required' => false,
@@ -81,7 +86,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'sandbox_login',
-                'text',
+                TextType::class,
                 [
                     'required' => false,
                     'label' => $this->translator->trans('login', [], Paypal::DOMAIN),
@@ -92,7 +97,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'sandbox_password',
-                'text',
+                TextType::class,
                 [
                     'required' => false,
                     'label' => $this->translator->trans('password', [], Paypal::DOMAIN),
@@ -103,7 +108,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'sandbox_signature',
-                'text',
+                TextType::class,
                 [
                     'required' => false,
                     'label' => $this->translator->trans('signature', [], Paypal::DOMAIN),
@@ -114,7 +119,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'allowed_ip_list',
-                'textarea',
+                TextareaType::class,
                 [
                     'required' => false,
                     'label' => $this->translator->trans('Allowed IPs in test mode', [], Paypal::DOMAIN),
@@ -132,7 +137,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'minimum_amount',
-                'text',
+                TextType::class,
                 [
                     'constraints' => [
                         new NotBlank(),
@@ -151,7 +156,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'maximum_amount',
-                'text',
+                TextType::class,
                 [
                     'constraints' => [
                         new NotBlank(),
@@ -170,7 +175,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'cart_item_count',
-                'text',
+                TextType::class,
                 [
                     'constraints' => [
                         new NotBlank(),
@@ -189,7 +194,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'send_confirmation_message_only_if_paid',
-                'checkbox',
+                CheckboxType::class,
                 [
                     'value' => 1,
                     'required' => false,
@@ -205,7 +210,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'send_payment_confirmation_message',
-                'checkbox',
+                CheckboxType::class,
                 [
                     'value' => 1,
                     'required' => false,
@@ -221,7 +226,7 @@ class ConfigurationForm extends BaseForm
             )
             ->add(
                 'send_cart_detail',
-                'checkbox',
+                CheckboxType::class,
                 [
                     'value' => 1,
                     'required' => false,
@@ -241,7 +246,7 @@ class ConfigurationForm extends BaseForm
     /**
      * @return string the name of your form. This name must be unique
      */
-    public function getName()
+    public static function getName()
     {
         return "configurepaypalform";
     }

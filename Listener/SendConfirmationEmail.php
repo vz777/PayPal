@@ -30,6 +30,8 @@ use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Mailer\MailerFactory;
 
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+
 /**
  * Class SendEMail
  * @package IciRelais\Listener
@@ -42,9 +44,12 @@ class SendConfirmationEmail extends BaseAction implements EventSubscriberInterfa
      */
     protected $mailer;
 
-    public function __construct(MailerFactory $mailer)
+    protected $eventDispatcher;
+
+    public function __construct(MailerFactory $mailer, EventDispatcherInterface $eventDispatcher)
     {
         $this->mailer = $mailer;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -58,7 +63,7 @@ class SendConfirmationEmail extends BaseAction implements EventSubscriberInterfa
             // We send the order confirmation email only if the order is paid
             $order = $event->getOrder();
 
-            if (! $order->isPaid() && $order->getPaymentModuleId() == Paypal::getModuleId()) {
+            if (!$order->isPaid() && $order->getPaymentModuleId() == Paypal::getModuleId()) {
                 $event->stopPropagation();
             }
         }
@@ -86,7 +91,9 @@ class SendConfirmationEmail extends BaseAction implements EventSubscriberInterfa
 
             // Send confirmation email if required.
             if (Paypal::getConfigValue('send_confirmation_message_only_if_paid')) {
-                $event->getDispatcher()->dispatch(TheliaEvents::ORDER_SEND_CONFIRMATION_EMAIL, $event);
+                //$event->getDispatcher()->dispatch($event, TheliaEvents::ORDER_SEND_CONFIRMATION_EMAIL);
+                //$dispatcher->dispatch($event, TheliaEvents::ORDER_SEND_CONFIRMATION_EMAIL);
+                $this->eventDispatcher->dispatch($event, TheliaEvents::ORDER_SEND_CONFIRMATION_EMAIL);
             }
         }
     }
@@ -94,7 +101,7 @@ class SendConfirmationEmail extends BaseAction implements EventSubscriberInterfa
     public static function getSubscribedEvents()
     {
         return array(
-            TheliaEvents::ORDER_UPDATE_STATUS           => array("updateStatus", 128),
+            TheliaEvents::ORDER_UPDATE_STATUS           => array("updateStatus", 100),
             TheliaEvents::ORDER_SEND_CONFIRMATION_EMAIL => array("sendConfirmationEmail", 129)
         );
     }

@@ -39,6 +39,8 @@ use Thelia\Model\OrderStatusQuery;
 use Thelia\Module\BasePaymentModuleController;
 use Thelia\Tools\URL;
 
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+
 /**
  * Class PaypalResponse
  * @package Paypal\Controller
@@ -58,7 +60,7 @@ class PaypalResponse extends BasePaymentModuleController
      * @param $order_id
      * @return \Thelia\Core\HttpFoundation\Response
      */
-    public function ok($order_id)
+    public function ok($order_id, EventDispatcherInterface $eventDispatcher)
     {
         $token = null;
 
@@ -146,7 +148,7 @@ class PaypalResponse extends BasePaymentModuleController
                          */
                         $event = new OrderEvent($order);
                         $event->setStatus(OrderStatusQuery::getPaidStatus()->getId());
-                        $this->dispatch(TheliaEvents::ORDER_UPDATE_STATUS, $event);
+                        $eventDispatcher->dispatch($event, TheliaEvents::ORDER_UPDATE_STATUS);
 
                         $this->redirectToSuccessPage($order_id);
                     } else {
@@ -179,7 +181,7 @@ class PaypalResponse extends BasePaymentModuleController
      * @param $order_id int
      * @return \Thelia\Core\HttpFoundation\Response
      */
-    public function cancel($order_id)
+    public function cancel($order_id, EventDispatcherInterface $eventDispatcher)
     {
         $token = null;
 
@@ -191,7 +193,7 @@ class PaypalResponse extends BasePaymentModuleController
 
             $event = new OrderEvent($order);
             $event->setStatus(OrderStatusQuery::create()->findOneByCode(OrderStatus::CODE_CANCELED)->getId());
-            $this->dispatch(TheliaEvents::ORDER_UPDATE_STATUS, $event);
+            $eventDispatcher->dispatch($event, TheliaEvents::ORDER_UPDATE_STATUS);
 
             $message = $this->getTranslator()->trans("You canceled your payment", [], Paypal::DOMAIN);
         } catch (\Exception $ex) {

@@ -31,6 +31,8 @@ use Paypal\Classes\NVP\PaypalNvpMessageSender;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Router;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Thelia\Core\Translation\Translator;
 use Thelia\Install\Database;
 use Thelia\Model\CountryQuery;
@@ -42,6 +44,8 @@ use Thelia\Model\OrderAddressQuery;
 use Thelia\Model\OrderQuery;
 use Thelia\Module\AbstractPaymentModule;
 use Thelia\Tools\URL;
+
+
 
 /**
  * Class Paypal
@@ -61,16 +65,9 @@ class Paypal extends AbstractPaymentModule
     {
         $orderId = $order->getId();
 
-        /** @var Router $router */
-        $router = $this->getContainer()->get('router.paypal');
+        $successUrl = URL::getInstance()->absoluteUrl("/module/paypal/ok/" . $order->getId());
 
-        $successUrl = URL::getInstance()->absoluteUrl(
-            $router->generate('paypal.ok', ['order_id' => $order->getId()])
-        );
-
-        $cancelUrl = URL::getInstance()->absoluteUrl(
-            $router->generate('paypal.cancel', ['order_id' => $order->getId()])
-        );
+        $cancelUrl = URL::getInstance()->absoluteUrl("/module/paypal/cancel/" . $order->getId());
 
         $order = OrderQuery::create()->findPk($orderId);
 
@@ -263,7 +260,7 @@ class Paypal extends AbstractPaymentModule
         return $valid;
     }
 
-    public function postActivation(ConnectionInterface $con = null)
+    public function postActivation(ConnectionInterface $con = null): void
     {
         // Setup some default values at first install
         if (null === self::getConfigValue('minimum_amount', null)) {
@@ -297,7 +294,7 @@ class Paypal extends AbstractPaymentModule
         }
     }
 
-    public function update($currentVersion, $newVersion, ConnectionInterface $con = null)
+    public function update($currentVersion, $newVersion, ConnectionInterface $con = null): void
     {
         if (null === self::getConfigValue('login', null)) {
             $database = new Database($con);
@@ -333,7 +330,7 @@ class Paypal extends AbstractPaymentModule
         return 1 == intval(self::getConfigValue('sandbox'));
     }
 
-    public function destroy(ConnectionInterface $con = null, $deleteModuleData = false)
+    public function destroy(ConnectionInterface $con = null, $deleteModuleData = false): void
     {
         if ($deleteModuleData) {
             MessageQuery::create()->findOneByName(self::CONFIRMATION_MESSAGE_NAME)->delete();
@@ -349,5 +346,13 @@ class Paypal extends AbstractPaymentModule
     public function manageStockOnCreation()
     {
         return false;
+    }
+
+    public static function configureServices(ServicesConfigurator $servicesConfigurator): void
+    {
+        $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
+            ->exclude([THELIA_MODULE_DIR . ucfirst(self::getModuleCode()). "/I18n/*"])
+            ->autowire(true)
+            ->autoconfigure(true);
     }
 }
